@@ -1,8 +1,10 @@
 module Spree
-  LineItem.class_eval do
-    scope :assemblies, -> { joins(product: :parts).distinct }
+  module LineItemExtForProductAssembly
+    def self.prepended(base)
+      scope :assemblies, -> { joins(product: :parts).distinct }
 
-    has_many :part_line_items, dependent: :destroy
+      has_many :part_line_items, dependent: :destroy
+    end
 
     def any_units_shipped?
       inventory_units.any? { |unit| unit.shipped? }
@@ -39,14 +41,11 @@ module Spree
 
     private
 
-    def update_inventory
-      if (changed? || target_shipment.present?) &&
-         order.has_checkout_step?("delivery")
-        if product.assembly?
-          OrderInventoryAssembly.new(self).verify(target_shipment)
-        else
-          OrderInventory.new(order, self).verify(target_shipment)
-        end
+    def verify_order_inventory
+      if product.assembly?
+        OrderInventoryAssembly.new(self).verify(target_shipment)
+      else
+        super
       end
     end
 
@@ -63,3 +62,5 @@ module Spree
     end
   end
 end
+
+Spree::LineItem.prepend Spree::LineItemExtForProductAssembly
