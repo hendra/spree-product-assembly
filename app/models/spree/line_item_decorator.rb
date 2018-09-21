@@ -1,9 +1,9 @@
 module Spree
   module LineItemExtForProductAssembly
     def self.prepended(base)
-      scope :assemblies, -> { joins(product: :parts).distinct }
+      base.scope :assemblies, -> { joins(product: :parts).distinct }
 
-      has_many :part_line_items, dependent: :destroy
+      base.has_many :part_line_items, dependent: :destroy
     end
 
     def any_units_shipped?
