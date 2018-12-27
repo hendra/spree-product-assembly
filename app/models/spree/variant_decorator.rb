@@ -12,4 +12,15 @@ Spree::Variant.class_eval do
   def part?
     assemblies.exists?
   end
+
+  def can_supply?(required = 1)
+    if parts_variants.exists?
+      backorderable? ||
+        parts_variants.
+        includes(part: :stock_items).
+        all? { |parts_variant| parts_variant.part.can_supply?(parts_variant.count * required) }
+    else
+      quantifier.can_supply?(required)
+    end
+  end
 end
