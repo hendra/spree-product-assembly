@@ -312,7 +312,7 @@ module Spree
       bundle.reload
 
       contents = Spree::OrderContents.new(order)
-      line_item = contents.add_to_line_item_with_parts(
+      line_item = contents.add(
         bundle.master,
         line_item_quantity,
         selected_variants

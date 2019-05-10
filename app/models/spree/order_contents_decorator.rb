@@ -1,54 +1,16 @@
 module Spree
-  OrderContents.class_eval do
-
-    def add_to_line_item(variant, quantity, options = {})
-      line_item = grab_line_item_by_variant(variant, false, options)
-
-      if line_item && part_variants_match?(line_item, variant, quantity, options)
-        line_item.quantity += quantity.to_i
-        line_item.currency = currency unless currency.nil?
-      else
-        opts = { currency: order.currency }.merge(whitelist(options))
-        line_item = order.line_items.new(quantity: quantity,
-                                          variant: variant,
-                                          options: opts)
-      end
-
-      line_item.target_shipment = options[:shipment] if options.has_key? :shipment
-      line_item.save!
-
-      line_item
-    end
-
-    def add_to_line_item_with_parts(variant, quantity, options = {})
-      add_to_line_item_without_parts(variant, quantity, options).
-        tap do |line_item|
-        populate_part_line_items(
-          line_item,
-          variant.parts_variants,
-          options["selected_variants"]
-        )
-      end
-    end
-
-    alias_method :add_to_line_item_without_parts, :add_to_line_item
-    alias_method :add_to_line_item, :add_to_line_item_with_parts
-
+  module OrderContents::SpreeProductAssemblyExtension
     private
 
-    def part_variants_match?(line_item, variant, quantity, options)
-      if line_item.parts.any? && options["selected_variants"]
-        selected_variant_ids = options["selected_variants"].values.map(&:to_i)
-        matched = part_variant_ids(line_item) & selected_variant_ids
+    def add_to_line_item(variant, quantity, options = {})
+      return super if variant.parts_variants.none?
 
-        matched == selected_variant_ids
-      else
-        true
-      end
-    end
+      line_item = super
+      return line_item if line_item.errors.present?
 
-    def part_variant_ids(line_item)
-      line_item.part_line_items.map(&:variant_id)
+      populate_part_line_items line_item, variant.parts_variants, options["selected_variants"]
+
+      line_item
     end
 
     def populate_part_line_items(line_item, parts, selected_variants)
@@ -69,13 +31,7 @@ module Spree
         part.part.id
       end
     end
-
-    def whitelist(params)
-      if params.is_a? ActionController::Parameters
-        params.permit(PermittedAttributes.line_item_attributes)
-      else
-        params.slice(*PermittedAttributes.line_item_attributes)
-      end
-    end
   end
+
+  OrderContents.prepend OrderContents::SpreeProductAssemblyExtension
 end

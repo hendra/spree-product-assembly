@@ -1,5 +1,5 @@
 describe Spree::OrderContents, type: :model do
-  describe "#add_to_line_item" do
+  describe "#add" do
     context "given a variant which is an assembly" do
       it "creates a PartLineItem for each part of the assembly" do
         order = create(:order)
@@ -11,7 +11,7 @@ describe Spree::OrderContents, type: :model do
 
         contents = described_class.new(order)
 
-        line_item = contents.add_to_line_item_with_parts(assembly.master, 1)
+        line_item = contents.add(assembly.master, 1)
 
         part_line_items = line_item.part_line_items
 
@@ -60,7 +60,7 @@ describe Spree::OrderContents, type: :model do
 
         contents = Spree::OrderContents.new(order)
 
-        line_item = contents.add_to_line_item_with_parts(assembly.master, 1, {
+        line_item = contents.add(assembly.master, 1, {
           "selected_variants" => {
             "#{assembly_part_keychain.part_id}" => "#{keychain.master.id}",
             "#{assembly_part_shirt.part_id}" => "#{shirt.variants.last.id}"
