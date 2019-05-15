@@ -13,4 +13,4 @@ end
 
 Spree::Order.prepend Spree::Order::SpreeProductAssemblyExtension
 
-Spree::Order.register_line_item_comparison_hook :line_item_comparison_by_part_variants
+Rails.application.config.spree.line_item_comparison_hooks << :line_item_comparison_by_part_variants

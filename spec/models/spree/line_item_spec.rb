@@ -20,9 +20,9 @@ module Spree
         end
 
         it "doesn't save line item quantity" do
-          expect { order.contents.add(variant, 10) }.to(
-            raise_error ActiveRecord::RecordInvalid
-          )
+          line_item = order.contents.add(variant, 10)
+
+          expect(line_item).not_to be_valid
         end
       end
 

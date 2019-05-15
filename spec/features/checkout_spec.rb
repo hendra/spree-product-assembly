@@ -56,6 +56,9 @@ RSpec.feature "Checkout", type: :feature do
         visit spree.root_path
         click_link variant.product.name
         click_button "add-to-cart-button"
+        wait_for_condition do
+          expect(page).to have_content(Spree.t(:shopping_cart))
+        end
       end
       include_context "purchases product with part included"
 

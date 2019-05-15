@@ -1,5 +1,5 @@
 RSpec.feature "Adding items to the cart", type: :feature do
-  context "when adding a bundle to the cart" do
+  context "when adding a bundle to the cart", js: true do
     context "when none of the bundle items are packs or have options" do
       scenario "the cart lists the contents of the bundle" do
         bundle = create(:product_in_stock, name: "Bundle", sku: "BUNDLE")
@@ -118,7 +118,7 @@ RSpec.feature "Adding items to the cart", type: :feature do
       end
     end
 
-    context "when one of the bundle items has a user-selectable variant", js: true do
+    context "when one of the bundle items has a user-selectable variant" do
       scenario "the cart includes the variant when listing bundle items" do
         bundle = create(:product_in_stock, name: "Bundle", sku: "BUNDLE")
 
@@ -155,7 +155,7 @@ RSpec.feature "Adding items to the cart", type: :feature do
       end
     end
 
-    context "when both of the bundle items have a user-selectable variant", js: true do
+    context "when both of the bundle items have a user-selectable variant" do
       let(:bundle) { create(:product_in_stock, name: "Bundle", sku: "BUNDLE") }
       let(:keychain) do
         create(:product_in_stock, name: "Keychain",
@@ -231,7 +231,8 @@ RSpec.feature "Adding items to the cart", type: :feature do
 
       context "and the user selects the same variants as the existing line item" do
         it "contains 1 line item with incremented variants and quantities" do
-          2.times { add_item_to_cart(size: "Large", color: "Red") }
+          add_item_to_cart(size: "Large", color: "Red")
+          add_item_to_cart(size: "Large", color: "Red")
 
           within "#cart-detail .line-item" do
             expect(page).to have_content(bundle.name)
@@ -257,6 +258,9 @@ RSpec.feature "Adding items to the cart", type: :feature do
     select "Size: #{args[:size]}", from: "options_selected_variants_3"
     select "Color: #{args[:color]}", from: "options_selected_variants_6"
     click_button "add-to-cart-button"
+    wait_for_condition do
+      expect(page).to have_content(Spree.t(:shopping_cart))
+    end
   end
 
   def bundled_product_from_options(args)

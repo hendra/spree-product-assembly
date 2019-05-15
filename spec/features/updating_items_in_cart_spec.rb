@@ -1,5 +1,5 @@
 RSpec.feature "Updating items in the cart", type: :feature do
-  context "when updating a bundle's quantity" do
+  context "when updating a bundle's quantity", js: true do
     context "when none of the bundle items are packs or have options" do
       scenario "the quantities are multiplied by the bundle's new quantity" do
         bundle = create(:product_in_stock, name: "Bundle", sku: "BUNDLE")
@@ -107,7 +107,7 @@ RSpec.feature "Updating items in the cart", type: :feature do
       end
     end
 
-    context "when one of the bundle items has a user-selectable variant", js: true do
+    context "when one of the bundle items has a user-selectable variant" do
       scenario "the variant quantity is multiplied by the new bundle quantity" do
         bundle = create(:product_in_stock, name: "Bundle", sku: "BUNDLE")
 
