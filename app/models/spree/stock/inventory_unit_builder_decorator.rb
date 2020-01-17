@@ -13,23 +13,14 @@ module Spree
         end
       end
 
-      def build_inventory_unit(variant, line_item, quantity=nil)
-        @order.inventory_units.includes(
-          variant: {
-            product: {
-              shipping_category: {
-                shipping_methods: [:calculator, { zones: :zone_members }]
-              }
-            }
-          }
-        ).build(
+      def build_inventory_unit(variant, line_item, quantity)
+        Spree::InventoryUnit.new(
           pending: true,
-          variant: variant,
-          line_item: line_item,
-          order: @order
-        ).tap do |iu|
-          iu.quantity = quantity if quantity
-        end
+          line_item_id: line_item.id,
+          variant_id: variant.id,
+          quantity: quantity,
+          order_id: @order.id
+        )
       end
     end
   end
