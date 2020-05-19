@@ -26,5 +26,30 @@ module Spree
       	expect(subject.percentage_of_line_item).to eq BigDecimal.new(0.5, 2)
       end
     end
+
+    describe '#required_quantity' do
+      before { line_item.update quantity: 2 }
+
+      it 'returns the line item quantity' do
+        expect(subject.required_quantity).to eq 2
+      end
+
+      context 'given an assembly product' do
+        let(:assembly) { line_item.variant }
+        let(:part) { create :variant }
+
+        subject { InventoryUnit.new line_item: line_item, variant: part, order: order }
+
+        before do
+          create :assemblies_part, assembly: assembly, part: part, count: 3
+          create :assemblies_part, assembly: assembly
+          StockItem.update_all count_on_hand: 10
+        end
+
+        it 'should include the part count' do
+          expect(subject.required_quantity).to eq 6
+        end
+      end
+    end
   end
 end
